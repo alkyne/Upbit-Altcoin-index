@@ -170,7 +170,7 @@ def place_limit_sell_orders():
         for ticker in alt_list:
             if ticker in balance_dict:
                 balance_info = balance_dict[ticker]
-                currency = balance_info['currency']
+                # currency = balance_info['currency']
                 available_balance = balance_info['balance']
 
                 # Skip if balance is zero

@@ -24,7 +24,7 @@ def _chunks(lst, n):
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
 
-def _get_volumes(krw_pairs, num_of_alts):
+def _get_volumes(krw_pairs):
     volume_data = {}
 
     for chunk in _chunks(krw_pairs, 200):
@@ -48,16 +48,14 @@ def _get_volumes(krw_pairs, num_of_alts):
     # pprint(volume_data)
     dict_sorted = dict(sorted(volume_data.items(), key=lambda x: x[1]['volume'], reverse=True))
 
-    sorted_volume_data = dict(list(dict_sorted.items())[:num_of_alts])
+    sorted_volume_data = dict(list(dict_sorted.items()))
 
     return sorted_volume_data
 
 def get_tickers():
-    with open('settings.json', 'r') as file:
-        settings = json.load(file)
 
     krw_pairs = _get_krw_pairs()
-    ticker_data = _get_volumes(krw_pairs, num_of_alts=int(settings['num_of_alts']))
+    ticker_data = _get_volumes(krw_pairs)
     
     return ticker_data
 
