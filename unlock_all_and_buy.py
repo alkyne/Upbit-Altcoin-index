@@ -172,10 +172,6 @@ def buy_crypto(cancel_ticker_list):
             # print(f"OK({code}): {ticker}\n")
             ok_list.append(ticker)
 
-    with open('alt_list.txt', 'w') as file:
-        for ticker in ok_list:
-            file.write(ticker + '\n')
-
     print(f"error list: {error_list}")
 
 if __name__ == '__main__':

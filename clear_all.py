@@ -3,6 +3,7 @@ import hashlib
 import os
 import requests
 import uuid
+import json
 from pprint import pprint
 from urllib.parse import urlencode, unquote
 from get_data import get_tickers
@@ -11,7 +12,9 @@ from get_data import get_tickers
 with open('alt_list.txt', 'r') as f:
     alt_list = [line for line in f.read().split("\n") if line]
 
-ticker_data = get_tickers()
+with open('settings.json', 'r') as file:
+    settings = json.load(file)
+exclude_pairs = settings['exclude_pairs']
 
 access_key = os.environ['UPBIT_OPEN_API_ACCESS_KEY']
 secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
@@ -130,7 +133,7 @@ def get_account_balance(print_status=False):
 
 ############# SELL #########
 # Function to place a limit sell order
-def place_limit_sell_order(market, volume, price):
+def _place_limit_sell_order(market, volume, price):
     query = {
         'market': market,
         'side': 'ask',            # 'ask' for sell orders
@@ -162,12 +165,15 @@ def place_limit_sell_order(market, volume, price):
 
 # Main function to place limit sell orders
 def place_limit_sell_orders():
+        ticker_data = get_tickers()
     # try:
         account_balances = get_account_balance()
         # Create a mapping from currency code to balance info
         balance_dict = {f"{item['unit_currency']}-{item['currency']}": item for item in account_balances}
 
         for ticker in alt_list:
+            if ticker in exclude_pairs:
+                continue
             if ticker in balance_dict:
                 balance_info = balance_dict[ticker]
                 # currency = balance_info['currency']
@@ -182,19 +188,19 @@ def place_limit_sell_orders():
                 # price = prices.get(market)
                 price = ticker_data[ticker]['trade_price']
                 if not price:
-                    print(f"No price specified for {ticker}. Skipping.")
+                    print(f"No price specified for {ticker}. Skipping..")
                     continue
 
                 # DEBUG
                 # print(f"{ticker}: {price}") 
 
                 # Place the limit sell order
-                order_result = place_limit_sell_order(
+                order_result = _place_limit_sell_order(
                     market=ticker,
                     volume=available_balance,
                     price=price
                 )
-                print(f"Placed limit sell order for {ticker}:")
+                print(f"Placed limit sell order for [{ticker}]:")
                 # pprint(order_result)
             # else:
                 # print(f"{ticker} not found in account balances.")

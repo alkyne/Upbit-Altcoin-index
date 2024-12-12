@@ -83,12 +83,13 @@ if __name__ == "__main__":
     print("======== open orders ========")
     open_orders_json = get_open_orders()
     for order in open_orders_json:
-        # if order['application_name'] == 'ios':
-        if "api" not in order['application_name']:
+        ticker = order['market']
+        if ticker in exclude_pairs:
             continue
+        application_name = order['application_name']
         ticker = order['market']
         side = order['side']
         locked = order['locked']
         volume = order['volume']
         remaining_volume = order['remaining_volume']
-        print(f"[{side}] {ticker}: Locked: {locked}, Volume: {volume}, Remaining Volume: {remaining_volume}")
+        print(f"[{side}] {ticker}: Locked: {locked}, Volume: {volume}, Remaining Volume: {remaining_volume} ({application_name})")
