@@ -83,7 +83,8 @@ if __name__ == "__main__":
     print("======== open orders ========")
     open_orders_json = get_open_orders()
     for order in open_orders_json:
-        if order['application_name'] == 'ios':
+        # if order['application_name'] == 'ios':
+        if "api" not in order['application_name']:
             continue
         ticker = order['market']
         side = order['side']

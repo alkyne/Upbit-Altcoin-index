@@ -13,7 +13,8 @@
 - `get_data.py`: 데이터 확인용. 실행하면 n개의 티커, 24시간 거래대금, 현재가를 보여줌
 - `check_settings.py`: 세팅 및 1회 주문 단가 확인용
 - `buy_all.py`: input_krw을 n종목에 배분하여 매수
-- `unlock_all_and_buy.py`: 대기 중인 모든 주문 취소 후 재매수
+- `unlock_all_and_buy.py`: (매수) 대기 중인 모든 주문 취소 후 재매수
+- `get_current_status.py`: 현재 open 매수/매도 주문들 확인 (API 주문만 출력)
 - `clear_all.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도
 - `alt_list.txt`: 매수한 알트 목록
 
