@@ -2,6 +2,10 @@ import requests
 import json
 from pprint import pprint
 
+with open('settings.json', 'r') as file:
+    settings = json.load(file)
+exclude_pairs = settings['exclude_pairs']
+
 def _get_krw_pairs():
     """Retrieve all KRW trading pairs from Upbit."""
     url = 'https://api.upbit.com/v1/market/all'
@@ -9,9 +13,6 @@ def _get_krw_pairs():
     response = requests.get(url, headers=headers)
     markets = response.json()
     
-    # List of pairs to exclude
-    exclude_pairs = ['KRW-BTC', 'KRW-ETH', 'KRW-SOL', 'KRW-USDT', 'KRW-USDC', 'KRW-CVC']
-
     # Build the list of KRW pairs, excluding the specified pairs
     krw_pairs = [
         market['market'] for market in markets
@@ -47,7 +48,6 @@ def _get_volumes(krw_pairs):
 
     # pprint(volume_data)
     dict_sorted = dict(sorted(volume_data.items(), key=lambda x: x[1]['volume'], reverse=True))
-
     sorted_volume_data = dict(list(dict_sorted.items()))
 
     return sorted_volume_data
@@ -62,6 +62,7 @@ def get_tickers():
 # for debug
 if __name__ == '__main__':
     ticker_data = get_tickers()
+    print(f"Ticker: 24-hour trade volume / price")
     for ticker, value in ticker_data.items():
         print(f"{ticker}: {value['volume']:,.0f} / {value['trade_price']}")
 

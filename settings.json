@@ -1,5 +1,6 @@
 {
-    "num_of_alts": 4,
+    "num_of_alts": 100,
     "minimum_volumne": 3000000,
-    "input_krw": 29795
+    "input_krw": 2000000,
+    "exclude_pairs": ["KRW-BTC", "KRW-ETH", "KRW-SOL", "KRW-USDT", "KRW-USDC", "KRW-CVC", "KRW-XRP", "KRW-MOVE", "KRW-ME", "KRW-BTG", "KRW-ETC", "KRW-BCH", "KRW-RENDER", "KRW-BTT"]
 }

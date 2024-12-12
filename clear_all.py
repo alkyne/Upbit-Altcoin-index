@@ -9,7 +9,7 @@ from get_data import get_tickers
 
 # get my alt list
 with open('alt_list.txt', 'r') as f:
-    alt_list = f.read().split("\n")[:-1]
+    alt_list = [line for line in f.read().split("\n") if line]
 
 ticker_data = get_tickers()
 
@@ -108,14 +108,14 @@ def cancel_orders_in_markets():
 ########### get account balance ###########
 def get_account_balance(print_status=False):
     payload = {
-    'access_key': access_key,
-    'nonce': str(uuid.uuid4()),
+        'access_key': access_key,
+        'nonce': str(uuid.uuid4()),
     }
 
     jwt_token = jwt.encode(payload, secret_key)
     authorization = 'Bearer {}'.format(jwt_token)
     headers = {
-    'Authorization': authorization,
+        'Authorization': authorization,
     }
 
     res = requests.get(server_url + '/v1/accounts', headers=headers)
