@@ -23,6 +23,8 @@ secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
 server_url = "https://api.upbit.com"
 
 def process_order(ticker, value, access_key, secret_key, server_url, krw_per_ticker):
+    if value['trade_price'] < 1:
+        return ticker, 500
     params = {
         'market': ticker,
         'side': 'bid', # buy
@@ -95,7 +97,7 @@ if __name__ == '__main__':
             except Exception as e:
                 error_list.append(ticker)
                 # Print exception if you'd like more info
-                # print(f"Exception for {ticker}: {e}")
+                print(f"Exception for {ticker}: {e}")
 
     # Write successful tickers to file
     with open('alt_list.txt', 'w') as file:

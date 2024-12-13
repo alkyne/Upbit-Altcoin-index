@@ -51,6 +51,9 @@ def _get_open_orders():
 
     # Send GET request to retrieve open orders
     res = requests.get(f"{server_url}/v1/orders", params=query, headers=headers)
+    # return res.status_code
+    if 400 <= res.status_code < 500:
+        assert False, f"{res.status_code} error occurred. | Response: {res.text}"
     res.raise_for_status()  # Raise an exception for HTTP errors
     return res.json()
 

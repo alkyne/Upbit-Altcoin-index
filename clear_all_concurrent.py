@@ -8,6 +8,8 @@ from pprint import pprint
 from urllib.parse import urlencode, unquote
 from get_data import get_tickers
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 # get my alt list
 with open('alt_list.txt', 'r') as f:
     alt_list = [line for line in f.read().split("\n") if line]
@@ -137,7 +139,6 @@ def get_account_balance(print_status=False):
     return res.json()
 
 ############# SELL #########
-# Function to place a limit sell order
 def _place_limit_sell_order(market, volume, price):
     query = {
         'market': market,
@@ -159,61 +160,76 @@ def _place_limit_sell_order(market, volume, price):
         'query_hash_alg': 'SHA512',
     }
 
-    jwt_token = jwt.encode(payload, secret_key)
+    jwt_token = jwt.encode(payload, secret_key, algorithm='HS256')
     headers = {
         'Authorization': f'Bearer {jwt_token}',
     }
 
     res = requests.post(f"{server_url}/v1/orders", params=query, headers=headers)
-    # res.raise_for_status()
     return res.json()
 
-# Main function to place limit sell orders
+def _process_sell_order(ticker, balance_dict, ticker_data):
+    # Skip excluded tickers
+    if ticker in exclude_pairs:
+        return ticker, None, "excluded"
+
+    # Check if ticker is in balance
+    if ticker not in balance_dict:
+        return ticker, None, "no_balance"
+
+    balance_info = balance_dict[ticker]
+    available_balance = balance_info['balance']
+
+    # Skip if balance is zero or non-positive
+    if float(available_balance) <= 0:
+        return ticker, None, "no_available_balance"
+    
+    # Get the price for the current market
+    price = ticker_data.get(ticker, {}).get('trade_price')
+    if not price:
+        return ticker, None, "no_price"
+
+    # Place the limit sell order
+    order_result = _place_limit_sell_order(
+        market=ticker,
+        volume=available_balance,
+        price=price
+    )
+    return ticker, order_result, "success"
+
 def place_limit_sell_orders():
-    # try:
-        account_balances = get_account_balance()
-        # Create a mapping from currency code to balance info
-        balance_dict = {f"{item['unit_currency']}-{item['currency']}": item for item in account_balances}
+    account_balances = get_account_balance()
+    balance_dict = {f"{item['unit_currency']}-{item['currency']}": item for item in account_balances}
 
-        ticker_data = get_tickers()
-        for ticker in alt_list:
-            if ticker in exclude_pairs:
-                continue
-            if ticker in balance_dict:
-                balance_info = balance_dict[ticker]
-                # currency = balance_info['currency']
-                available_balance = balance_info['balance']
+    # Lists to keep track of results
+    success_list = []
+    error_list = []
 
-                # Skip if balance is zero
-                if float(available_balance) <= 0:
-                    print(f"No available balance to sell for {ticker}.")
-                    continue
+    ticker_data = get_tickers()
+    # Run the sell orders concurrently
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        futures = {
+            executor.submit(_process_sell_order, ticker, balance_dict, ticker_data): ticker
+            for ticker in alt_list
+        }
 
-                # Get the price for the current market
-                # price = prices.get(market)
-                price = ticker_data[ticker]['trade_price']
-                if not price:
-                    print(f"No price specified for {ticker}. Skipping..")
-                    continue
+        for future in as_completed(futures):
+            ticker = futures[future]
+            try:
+                ticker_name, result, status = future.result()
+                if status == "success":
+                    print(f"Placed limit sell order for [{ticker_name}]: {result}")
+                    success_list.append(ticker_name)
+                else:
+                    print(f"Skipped or error for [{ticker_name}] - Reason: {status}")
+                    error_list.append((ticker_name, status))
+            except Exception as e:
+                print(f"Exception for {ticker}: {e}")
+                error_list.append((ticker, "exception"))
 
-                # DEBUG
-                # print(f"{ticker}: {price}") 
-
-                # Place the limit sell order
-                order_result = _place_limit_sell_order(
-                    market=ticker,
-                    volume=available_balance,
-                    price=price
-                )
-                print(f"Placed limit sell order for [{ticker}]:")
-                # pprint(order_result)
-            # else:
-                # print(f"{ticker} not found in account balances.")
-    # except requests.exceptions.HTTPError as err:
-    #     error_msg = err.response.json()
-    #     print(f"HTTP error occurred: {error_msg}")
-    # except Exception as e:
-    #     print(f"place_limit_sell_orders: An error occurred: {e}")
+    print("Completed concurrent sell orders.")
+    print("Success:", success_list)
+    print("Errors:", error_list)
 
 if __name__ == '__main__':
     cancel_orders_in_markets() # unlock all assets first

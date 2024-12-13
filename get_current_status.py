@@ -37,6 +37,10 @@ def _get_account_balance(print_status=False):
     #         if f"{x['unit_currency']}-{x['currency']}" in alt_list:
     #             pprint(x)
 
+    # return res.status_code
+    if 400 <= res.status_code < 500:
+        assert False, f"{res.status_code} error occurred. | Response: {res.text}"
+
     return res.json()
 
 # Function to get all open orders
@@ -102,6 +106,7 @@ def print_account_balance():
 
 def print_pnl():
     accounts = _get_account_balance()
+    # pprint(accounts)
 
     # Filter out only currencies that have a non-zero avg_buy_price and non-zero balance (i.e., actual positions)
     # Also skip pure KRW (fiat) since that is just cash holding, not a traded asset
@@ -149,6 +154,9 @@ def print_pnl():
 
     # Sort results by PnL% descending
     results.sort(key=lambda x: x['pnl_percent'], reverse=True)
+    
+    num_positive_pnl = 0
+    num_negative_pnl = 0
 
     # Print after sorting
     for res in results:
@@ -157,7 +165,13 @@ def print_pnl():
         market = res['market']
         sign_krw = "+" if pnl >= 0 else "-"
         sign_pct = "+" if pnl_percent >= 0 else "-"
-        print(f"{market}: {sign_krw}{abs(pnl):,.0f}KRW {sign_pct}{abs(pnl_percent):.2f}%")
+        print(f"{market}: {sign_krw}{abs(pnl):,.0f} KRW {sign_pct}{abs(pnl_percent):.2f}%")
+
+        # Count positive/negative PnL
+        if pnl >= 0:
+            num_positive_pnl += 1
+        else:
+            num_negative_pnl += 1
 
     # Print total PnL summary
     if total_invest_krw > 0:
@@ -169,7 +183,8 @@ def print_pnl():
     sign_pct = "+" if total_pnl_percent >= 0 else "-"
 
     print()
-    print(f"Total: {sign_krw}{abs(total_pnl_krw):,.0f}KRW {sign_pct}{abs(total_pnl_percent):.2f}%")
+    print(f"+: {num_positive_pnl}, -: {num_negative_pnl}")
+    print(f"Total: {sign_krw}{abs(total_pnl_krw):,.0f} KRW {sign_pct}{abs(total_pnl_percent):.2f}%")
 
     # Print number of alts (positions)
     print(f"num of alts: {len(results)}\n")
@@ -177,7 +192,7 @@ def print_pnl():
 if __name__ == "__main__":
 
     print(f"Usage: python3 {os.path.basename(__file__)} {{pnl}}")
-    input()
+    # input()
 
     if "pnl" in sys.argv:
         print_pnl()
