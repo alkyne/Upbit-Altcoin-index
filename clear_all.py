@@ -165,12 +165,12 @@ def _place_limit_sell_order(market, volume, price):
 
 # Main function to place limit sell orders
 def place_limit_sell_orders():
-        ticker_data = get_tickers()
     # try:
         account_balances = get_account_balance()
         # Create a mapping from currency code to balance info
         balance_dict = {f"{item['unit_currency']}-{item['currency']}": item for item in account_balances}
 
+        ticker_data = get_tickers()
         for ticker in alt_list:
             if ticker in exclude_pairs:
                 continue

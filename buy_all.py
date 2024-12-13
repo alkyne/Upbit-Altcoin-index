@@ -27,7 +27,7 @@ server_url = "https://api.upbit.com"
 if __name__ == '__main__':
     print("==== settings ====")
     print_settings()
-    ans = input("continue? (y/n)")
+    ans = input("\ncontinue? (y/n)")
 
     if ans != 'y':
         print('bye')
