@@ -7,8 +7,14 @@
 -  **[Deprecated]** `python3 buy_all.py` 실행하여 씨뿌리기 
 - `python3 buy_all_concurrent.py`: 실행하여 씨뿌리기 (n개 주문 동시에 넣기)
 - `python3 unlock_all_and_buy.py` 체결 안 된 주문 취소 후 재매수
-- `python3 clear_all.py` 뿌린 모든 씨앗 회수
+- **[Deprecated]** `python3 clear_all.py` 뿌린 모든 씨앗 회수
     - 여러번 실행하여 체결 안 되어 회수 안 된 씨앗 계속 회수
+- `python3 clear_all_concurrent.py` 뿌린 모든 씨앗 회수
+    - 여러번 실행하여 체결 안 되어 회수 안 된 씨앗 계속 회수
+- `python3 get_current_status.py {pnl}`
+    - 보유 알트 pnl 확인, 토탈 pnl 확인
+    - 보유 알트 목록 확인
+    - 매수/매도 대기 주문 확인 (open orders)
 
 ## File descriptions
 - `get_data.py`: 데이터 확인용. 실행하면 n개의 티커, 24시간 거래대금, 현재가를 보여줌
@@ -20,7 +26,7 @@
     - 보유 알트 목록, 개수 확인
     - 현재 open 매수/매도 주문들 확인
 - **[Deprecated]** `clear_all.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도
-- **[Deprecated]** `clear_all.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도 (n개 요청 동시에)
+- `clear_all_concurrent.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도 (n개 요청 동시에)
 - `alt_list.txt`: 매수한 알트 목록
 
 ## etc
