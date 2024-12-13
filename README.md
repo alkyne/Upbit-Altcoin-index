@@ -19,7 +19,8 @@
 - `get_current_status.py`
     - 보유 알트 목록, 개수 확인
     - 현재 open 매수/매도 주문들 확인
-- `clear_all.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도
+- **[Deprecated]** `clear_all.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도
+- **[Deprecated]** `clear_all.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도 (n개 요청 동시에)
 - `alt_list.txt`: 매수한 알트 목록
 
 ## etc
