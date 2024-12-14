@@ -186,7 +186,7 @@ def place_limit_sell_orders():
 
                 # Skip if balance is zero
                 if float(available_balance) <= 0:
-                    print(f"No available balance to sell for {ticker}.")
+                    # print(f"No available balance to sell for {ticker}.")
                     continue
 
                 # Get the price for the current market
@@ -205,7 +205,7 @@ def place_limit_sell_orders():
                     volume=available_balance,
                     price=price
                 )
-                print(f"Placed limit sell order for [{ticker}]:")
+                print(f"Placed limit sell order for [{ticker}]: {order_result}")
                 # pprint(order_result)
             # else:
                 # print(f"{ticker} not found in account balances.")
@@ -216,6 +216,6 @@ def place_limit_sell_orders():
     #     print(f"place_limit_sell_orders: An error occurred: {e}")
 
 if __name__ == '__main__':
-    cancel_orders_in_markets() # unlock all assets first
+    # cancel_orders_in_markets() # unlock all assets first
     place_limit_sell_orders()
     get_account_balance(print_status=True)

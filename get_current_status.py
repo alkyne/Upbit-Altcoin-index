@@ -126,6 +126,7 @@ def print_pnl():
     results = []
     total_pnl_krw = 0.0
     total_invest_krw = 0.0
+    current_value_culmulative = 0
 
     for acc in traded_positions:
         currency = acc['currency']
@@ -140,6 +141,7 @@ def print_pnl():
         current_price = ticker_data[market]['trade_price']
         invest_amount = avg_buy_price * balance
         current_value = current_price * balance
+        current_value_culmulative += current_value
         pnl = current_value - invest_amount
         pnl_percent = (pnl / invest_amount) * 100 if invest_amount != 0 else 0
 
@@ -184,7 +186,7 @@ def print_pnl():
 
     print()
     print(f"+: {num_positive_pnl}, -: {num_negative_pnl}")
-    print(f"Total: {sign_krw}{abs(total_pnl_krw):,.0f} KRW {sign_pct}{abs(total_pnl_percent):.2f}%")
+    print(f"Total: {current_value_culmulative:,.0f} KRW / PnL: {sign_krw}{abs(total_pnl_krw):,.0f} KRW {sign_pct}{abs(total_pnl_percent):.2f}%")
 
     # Print number of alts (positions)
     print(f"num of alts: {len(results)}\n")

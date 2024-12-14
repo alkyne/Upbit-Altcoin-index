@@ -3,6 +3,7 @@ import hashlib
 import os
 import requests
 import uuid
+import time
 import json
 from pprint import pprint
 from urllib.parse import urlencode, unquote
@@ -166,16 +167,13 @@ def _place_limit_sell_order(market, volume, price):
     }
 
     res = requests.post(f"{server_url}/v1/orders", params=query, headers=headers)
+    print(f"Placed sell order for {market}.")
     return res.json()
 
 def _process_sell_order(ticker, balance_dict, ticker_data):
     # Skip excluded tickers
     if ticker in exclude_pairs:
         return ticker, None, "excluded"
-
-    # Check if ticker is in balance
-    if ticker not in balance_dict:
-        return ticker, None, "no_balance"
 
     balance_info = balance_dict[ticker]
     available_balance = balance_info['balance']
@@ -205,14 +203,16 @@ def place_limit_sell_orders():
     success_list = []
     error_list = []
 
-    ticker_data = get_tickers()
+    # ticker_data = get_tickers()
     # Run the sell orders concurrently
-    with ThreadPoolExecutor(max_workers=100) as executor:
+    ticker_data = get_tickers()
+    with ThreadPoolExecutor(max_workers=8) as executor:
         futures = {
             executor.submit(_process_sell_order, ticker, balance_dict, ticker_data): ticker
-            for ticker in alt_list
+            for ticker in balance_dict.keys()
         }
 
+        count = 0
         for future in as_completed(futures):
             ticker = futures[future]
             try:
@@ -220,18 +220,26 @@ def place_limit_sell_orders():
                 if status == "success":
                     print(f"Placed limit sell order for [{ticker_name}]: {result}")
                     success_list.append(ticker_name)
+                elif status == "excluded":
+                    pass
                 else:
-                    print(f"Skipped or error for [{ticker_name}] - Reason: {status}")
+                    # print(f"Skipped or error for [{ticker_name}] - Reason: {status}")
                     error_list.append((ticker_name, status))
             except Exception as e:
                 print(f"Exception for {ticker}: {e}")
                 error_list.append((ticker, "exception"))
+            
+            count += 1
+            if count % 8 == 0:
+                # Sleep for 1 second after every 8 completed tasks
+                time.sleep(1)
+                # ticker_data = get_tickers()
 
     print("Completed concurrent sell orders.")
     print("Success:", success_list)
     print("Errors:", error_list)
 
 if __name__ == '__main__':
-    cancel_orders_in_markets() # unlock all assets first
+    # cancel_orders_in_markets() # unlock all assets first
     place_limit_sell_orders()
-    get_account_balance(print_status=True)
+    get_account_balance(print_status=False)

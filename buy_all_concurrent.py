@@ -6,6 +6,7 @@ import hashlib
 import requests
 from urllib.parse import urlencode, unquote
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from get_data import get_tickers
@@ -23,7 +24,7 @@ secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
 server_url = "https://api.upbit.com"
 
 def process_order(ticker, value, access_key, secret_key, server_url, krw_per_ticker):
-    if value['trade_price'] < 1:
+    if value['trade_price'] <= 0:
         return ticker, 500
     params = {
         'market': ticker,
@@ -66,13 +67,13 @@ if __name__ == '__main__':
     error_list = []
     ok_list = []
 
-    ticker_data = get_tickers()
 
     # Extract only the first 'num_of_alts' items
+    ticker_data = get_tickers()
     items = list(ticker_data.items())[:num_of_alts]
 
     # Run the orders concurrently
-    with ThreadPoolExecutor(max_workers=100) as executor:
+    with ThreadPoolExecutor(max_workers=8) as executor:
         future_to_ticker = {
             executor.submit(
                 process_order, 
@@ -86,6 +87,7 @@ if __name__ == '__main__':
             for ticker, value in items
         }
 
+        count = 0
         for future in as_completed(future_to_ticker):
             ticker = future_to_ticker[future]
             try:
@@ -98,6 +100,11 @@ if __name__ == '__main__':
                 error_list.append(ticker)
                 # Print exception if you'd like more info
                 print(f"Exception for {ticker}: {e}")
+
+            count += 1
+            if count % 8 == 0:
+                # Sleep for 1 second after every 8 completed tasks
+                time.sleep(1)
 
     # Write successful tickers to file
     with open('alt_list.txt', 'w') as file:
