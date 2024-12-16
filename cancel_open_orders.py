@@ -90,7 +90,7 @@ def cancel_orders_in_markets(_side="all"):
             return
 
         # Filter orders to only include those in specified markets
-        orders_to_cancel = [order for order in open_orders if order['market'] in alt_list]
+        orders_to_cancel = [order for order in open_orders]
 
         if not orders_to_cancel:
             # print("No open orders found in the specified markets.")

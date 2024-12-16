@@ -64,6 +64,13 @@ if __name__ == '__main__':
     ticker_data = get_tickers()
     print(f"Ticker: 24-hour trade volume / price")
     for ticker, value in ticker_data.items():
-        print(f"{ticker}: {value['volume']:,.0f} / {value['trade_price']}")
+        price = value['trade_price']
+        if isinstance(price, float) and price < 100:
+            print(f"{ticker}: {value['volume']:,.0f} / {price:,.6f} KRW")
+        elif isinstance(price, float) and price < 1000:
+        # Print the value with 5 decimal places
+            print(f"{ticker}: {value['volume']:,.0f} / {price:,.1f} KRW")
+        else:
+            print(f"{ticker}: {value['volume']:,.0f} / {price:,.0f} KRW")
 
     print(f"num_of_data: {len(ticker_data)}")
