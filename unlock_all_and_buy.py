@@ -20,6 +20,7 @@ with open('settings.json', 'r') as file:
 num_of_alts = settings['num_of_alts']
 input_krw = settings['input_krw'] * (1 - 0.0005)
 krw_per_ticker = floor(input_krw / num_of_alts)
+exclude_pairs = settings['exclude_pairs']
 
 access_key = os.environ['UPBIT_OPEN_API_ACCESS_KEY']
 secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
@@ -97,13 +98,12 @@ def cancel_orders_in_markets():
             return []
 
         # Filter orders to only include those in specified markets
-        orders_to_cancel = [order for order in open_orders if order['market'] in alt_list]
+        orders_to_cancel = [order for order in open_orders if order['market'] not in exclude_pairs]
 
         if not orders_to_cancel:
             print("No open orders to cancel.")
             return []
         
-
         for order in orders_to_cancel:
             side = order['side'] # bid or ask
             # bid only

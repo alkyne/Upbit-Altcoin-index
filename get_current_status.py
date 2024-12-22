@@ -9,13 +9,7 @@ from pprint import pprint
 from urllib.parse import urlencode, unquote
 from get_data import get_tickers
 
-access_key = os.environ['UPBIT_OPEN_API_ACCESS_KEY']
-secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
-server_url = "https://api.upbit.com"
-
-with open('settings.json', 'r') as file:
-    settings = json.load(file)
-exclude_pairs = settings['exclude_pairs']
+from settings import *
 
 def _get_account_balance(print_status=False):
     payload = {

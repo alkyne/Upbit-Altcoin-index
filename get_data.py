@@ -2,9 +2,7 @@ import requests
 import json
 from pprint import pprint
 
-with open('settings.json', 'r') as file:
-    settings = json.load(file)
-exclude_pairs = settings['exclude_pairs']
+from settings import *
 
 def _get_krw_pairs():
     """Retrieve all KRW trading pairs from Upbit."""

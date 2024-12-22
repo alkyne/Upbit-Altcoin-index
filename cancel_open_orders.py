@@ -11,13 +11,7 @@ from pprint import pprint
 from urllib.parse import urlencode, unquote
 from get_data import get_tickers
 
-with open('settings.json', 'r') as file:
-    settings = json.load(file)
-exclude_pairs = settings['exclude_pairs']
-
-access_key = os.environ['UPBIT_OPEN_API_ACCESS_KEY']
-secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
-server_url = "https://api.upbit.com"
+from settings import *
 
 # Function to get all open orders
 def _get_open_orders():
