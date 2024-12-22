@@ -137,6 +137,5 @@ if __name__ == '__main__':
     #         file.write(ticker + '\n')
 
     print()
-    print(f"ok list: {error_list}")
-    print()
+    print(f"ok list: {ok_list}")
     print(f"error list: {error_list}")
