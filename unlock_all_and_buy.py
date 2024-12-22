@@ -11,20 +11,7 @@ from pprint import pprint
 from urllib.parse import urlencode, unquote
 from get_data import get_tickers
 
-# get my alt list
-with open('alt_list.txt', 'r') as f:
-    alt_list = [line for line in f.read().split("\n") if line]
-
-with open('settings.json', 'r') as file:
-    settings = json.load(file)
-num_of_alts = settings['num_of_alts']
-input_krw = settings['input_krw'] * (1 - 0.0005)
-krw_per_ticker = floor(input_krw / num_of_alts)
-exclude_pairs = settings['exclude_pairs']
-
-access_key = os.environ['UPBIT_OPEN_API_ACCESS_KEY']
-secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
-server_url = "https://api.upbit.com"
+from settings import *
 
 # Function to get all open orders
 def _get_open_orders():
@@ -175,6 +162,8 @@ def buy_crypto(cancel_ticker_list):
             # print(f"OK({code}): {ticker}\n")
             ok_list.append(ticker)
 
+    print()
+    print(f"ok list: {ok_list}")
     print(f"error list: {error_list}")
 
 if __name__ == '__main__':
