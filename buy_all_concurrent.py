@@ -15,7 +15,7 @@ from check_settings import print_settings
 
 from settings import *
 
-def process_order(ticker, trade_price, access_key, secret_key, server_url, krw_per_ticker):
+def process_order(ticker, trade_price, krw_per_ticker):
 
     if trade_price <= 0:
         return ticker, 500
@@ -47,7 +47,7 @@ def process_order(ticker, trade_price, access_key, secret_key, server_url, krw_p
 
     # Perform the real buy order
     res = requests.post(server_url + '/v1/orders', json=params, headers=headers)
-    print (f"Placing order {ticker}: {volume} at {trade_price}...")
+    print (f"Placing bid order for {ticker}: {volume} at {trade_price}...")
     code = res.status_code
     return code, res.text
 
@@ -97,9 +97,6 @@ if __name__ == '__main__':
                     process_order, 
                     ticker, 
                     trade_price, # current price
-                    access_key, 
-                    secret_key, 
-                    server_url, 
                     krw_per_ticker
                 ): ticker
                 for ticker, trade_price in batch.items()
