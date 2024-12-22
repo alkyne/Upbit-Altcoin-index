@@ -13,27 +13,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from get_data import get_tickers
 from check_settings import print_settings
 
-with open('settings.json', 'r') as file:
-    settings = json.load(file)
-num_of_alts = settings['num_of_alts']
-input_krw = settings['input_krw'] * (1 - 0.0005)
-krw_per_ticker = floor(input_krw / num_of_alts)
+from settings import *
 
-access_key = os.environ['UPBIT_OPEN_API_ACCESS_KEY']
-secret_key = os.environ['UPBIT_OPEN_API_SECRET_KEY']
-# server_url = os.environ['UPBIT_OPEN_API_SERVER_URL']
-server_url = "https://api.upbit.com"
+def process_order(ticker, trade_price, access_key, secret_key, server_url, krw_per_ticker):
 
-def process_order(ticker, value, access_key, secret_key, server_url, krw_per_ticker):
-
-    if value['trade_price'] <= 0:
+    if trade_price <= 0:
         return ticker, 500
+    
+    volume = krw_per_ticker/trade_price
     params = {
         'market': ticker,
         'side': 'bid', # buy
         'ord_type': 'limit',
-        'price': value['trade_price'], # current price
-        'volume': krw_per_ticker/value['trade_price']
+        'price': trade_price, # current price
+        'volume': volume
     }
     
     query_string = unquote(urlencode(params, doseq=True)).encode("utf-8")
@@ -54,8 +47,9 @@ def process_order(ticker, value, access_key, secret_key, server_url, krw_per_tic
 
     # Perform the real buy order
     res = requests.post(server_url + '/v1/orders', json=params, headers=headers)
+    print (f"Placing order {ticker}: {volume} at {trade_price}...")
     code = res.status_code
-    return ticker, code
+    return code, res.text
 
 if __name__ == '__main__':
     print("==== settings ====")
@@ -79,54 +73,70 @@ if __name__ == '__main__':
     #     ('KRW-ONDO', {'trade_price': 2932.0, 'volume': 396857638902.4854}),
     #     ('KRW-BORA', {'trade_price': 242.6, 'volume': 370416032826.3714})]
 
-    chunk_size = 8
-    ticker_list = ticker_data.keys()[:num_of_alts]
+    ticker_list = list(ticker_data.keys())[:num_of_alts]
+    print ("ticker list:")
+    # print (ticker_list)
+    # input()
 
     # Run the orders concurrently
+    chunk_size = 8
     i = 0
     while i < len(ticker_list):
 
         ticker_list_batch = ticker_list[i:i+chunk_size] # slice key(tickers)
 
         ticker_data = get_tickers() # to get trade_price
-        batch = {key: ticker_data[key] for key in ticker_list_batch if key in ticker_data}
+        batch = {key: ticker_data[key]['trade_price'] for key in ticker_list_batch if key in ticker_data}
+        # print (f"batch {i}:")
+        # print (batch)
+        # {'KRW-AGLD': 2731.0, 'KRW-UXLINK': 2130.0, 'KRW-DOGE': 483.4, 'KRW-CTC': 2060.0, 'KRW-HIVE': 526.6, 'KRW-STRAX': 120.2, 'KRW-ONDO': 2549.0, 'KRW-DRIFT': 1689.0}
 
         with ThreadPoolExecutor(max_workers=chunk_size) as executor:
             future_to_ticker = {
                 executor.submit(
                     process_order, 
                     ticker, 
-                    value, # value['trade_price'], # current price
+                    trade_price, # current price
                     access_key, 
                     secret_key, 
                     server_url, 
                     krw_per_ticker
                 ): ticker
-                for ticker, value in batch
+                for ticker, trade_price in batch.items()
             }
+
+            # print (future_to_ticker)
+            # input()
+            # {<Future at 0x1037baab0 state=finished raised TypeError>: 'KRW-AGLD'}
+            # {<Future at 0x105022630 state=running>: 'KRW-ATH'}
             
             for future in as_completed(future_to_ticker):
                 ticker = future_to_ticker[future]
+
                 try:
-                    ticker_result, code = future.result()
+                    code, text = future.result()
                     if code != 201:
-                        error_list.append(ticker_result)
+                        error_list.append(ticker)
+                        print (f"{ticker} error: {text}")
                     else:
-                        ok_list.append(ticker_result)
+                        ok_list.append(ticker)
                 except Exception as e:
                     error_list.append(ticker)
                     # Print exception if you'd like more info
                     print(f"Exception for {ticker}: {e}")
 
-                i += chunk_size
-                if i < len(ticker_list):
-                    # Sleep for 1 second after every 8 completed tasks
-                    time.sleep(1)
-                    ticker_data = get_tickers()
+        i += chunk_size
+        if i < len(ticker_list):
+            # Sleep for 1 second after every 8 completed tasks
+            time.sleep(1)
+            print()
 
     # Write successful tickers to file
-    with open('alt_list.txt', 'w') as file:
-        for ticker in ok_list:
-            file.write(ticker + '\n')
+    # with open('alt_list.txt', 'w') as file:
+    #     for ticker in ok_list:
+    #         file.write(ticker + '\n')
 
+    print()
+    print(f"ok list: {error_list}")
+    print()
     print(f"error list: {error_list}")
