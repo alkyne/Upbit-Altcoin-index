@@ -1,10 +1,12 @@
 import requests
 import json
+import argparse
+import sys
 from pprint import pprint
 
 from settings import *
 
-def _get_krw_pairs():
+def _get_krw_pairs(ticker="all"):
     """Retrieve all KRW trading pairs from Upbit."""
     url = 'https://api.upbit.com/v1/market/all'
     headers = {"Accept": "application/json"}
@@ -50,16 +52,25 @@ def _get_volumes(krw_pairs):
 
     return sorted_volume_data
 
-def get_tickers():
+def get_tickers(ticker="all"):
 
-    krw_pairs = _get_krw_pairs()
+    if ticker == "all":
+        krw_pairs = _get_krw_pairs()
+    else:
+        krw_pairs = [ticker.upper()]
     ticker_data = _get_volumes(krw_pairs)
     
     return ticker_data
 
 # for debug
 if __name__ == '__main__':
-    ticker_data = get_tickers()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("ticker", nargs='?', default="all")    
+    args = parser.parse_args()
+
+    # Retrieve the ticker argument, defaulting to 'all'
+    ticker = args.ticker
+    ticker_data = get_tickers(ticker)
     print(f"Ticker: 24-hour trade volume / price")
     for ticker, value in ticker_data.items():
         price = value['trade_price']

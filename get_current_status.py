@@ -3,6 +3,7 @@ import json
 import hashlib
 import sys
 import os
+import argparse
 import requests
 import uuid
 from pprint import pprint
@@ -10,6 +11,9 @@ from urllib.parse import urlencode, unquote
 from get_data import get_tickers
 
 from settings import *
+
+pnl_ticker_list = []
+holding_ticker_list = []
 
 def _get_account_balance(print_status=False):
     payload = {
@@ -82,8 +86,28 @@ def print_open_orders():
         print(f"[{side}] {ticker}: Locked: {locked}, Volume: {volume}, Remaining Volume: {remaining_volume} ({application_name})")
 
 def print_account_balance():
+    global holding_ticker_list
     account_ticker_list = []
     res = _get_account_balance()
+    '''
+    [{'avg_buy_price': '132992558.1098141',
+    'avg_buy_price_modified': False,
+    'balance': '0.00514087',
+    'currency': 'BTC',
+    'locked': '0',
+    'unit_currency': 'KRW'},
+    {'avg_buy_price': '0',
+    'avg_buy_price_modified': True,
+    'balance': '26549.37363765',
+    'currency': 'KRW',
+    'locked': '0',
+    'unit_currency': 'KRW'},
+    {'avg_buy_price': '2229',
+    'avg_buy_price_modified': False,
+    'balance': '11.91475998',
+    'currency': 'WAVES',
+    'locked': '0'}]
+    '''
 
     # pprint(res)
 
@@ -91,31 +115,62 @@ def print_account_balance():
         ticker = f"{x['unit_currency']}-{x['currency']}"
         if ticker in exclude_pairs:
             continue
+        if float(x['balance']) <= 0 or float(x['avg_buy_price']) <= 0:
+            continue
         account_ticker_list.append(ticker)
         # print(ticker)
 
     print("======== Holding alt list ========")
     print(account_ticker_list)
     print(f"num of alt: {len(account_ticker_list)}\n")
+    holding_ticker_list = account_ticker_list
 
-def print_pnl():
+def print_pnl(ticker="all"):
+    global pnl_ticker_list
     accounts = _get_account_balance()
     # pprint(accounts)
+    '''
+    [{'avg_buy_price': '132992558.1098141',
+    'avg_buy_price_modified': False,
+    'balance': '0.00514087',
+    'currency': 'BTC',
+    'locked': '0',
+    'unit_currency': 'KRW'},
+    {'avg_buy_price': '0',
+    'avg_buy_price_modified': True,
+    'balance': '26549.37363765',
+    'currency': 'KRW',
+    'locked': '0',
+    'unit_currency': 'KRW'},
+    {'avg_buy_price': '2229',
+    'avg_buy_price_modified': False,
+    'balance': '11.91475998',
+    'currency': 'WAVES',
+    'locked': '0'}]
+    '''
 
     # Filter out only currencies that have a non-zero avg_buy_price and non-zero balance (i.e., actual positions)
     # Also skip pure KRW (fiat) since that is just cash holding, not a traded asset
-    traded_positions = [
-        acc for acc in accounts
-        if acc['currency'] != 'KRW'
-        and float(acc['balance']) > 0
-        and float(acc['avg_buy_price']) > 0
-    ]
+
+    if ticker != "all":
+        traded_positions = [
+            acc for acc in accounts 
+            if f"{acc['unit_currency']}-{acc['currency']}" == ticker.upper()
+        ]
+    else:
+        traded_positions = [
+            acc for acc in accounts
+            # if acc['currency'] != 'KRW'
+            if f"{acc['unit_currency']}-{acc['currency']}" not in exclude_pairs
+            and float(acc['balance']) > 0
+            and float(acc['avg_buy_price']) > 0
+        ]
 
     if not traded_positions:
         print("No traded positions found.")
         return
 
-    ticker_data = get_tickers()
+    ticker_data = get_tickers(ticker)
 
     results = []
     total_pnl_krw = 0.0
@@ -145,7 +200,8 @@ def print_pnl():
         results.append({
             'market': market,
             'pnl': pnl,
-            'pnl_percent': pnl_percent
+            'pnl_percent': pnl_percent,
+            'current_value': current_value
         })
 
     # Sort results by PnL% descending
@@ -159,9 +215,11 @@ def print_pnl():
         pnl = res['pnl']
         pnl_percent = res['pnl_percent']
         market = res['market']
+        current_value = floor(res['current_value'])
         sign_krw = "+" if pnl >= 0 else "-"
         sign_pct = "+" if pnl_percent >= 0 else "-"
-        print(f"{market}: {sign_krw}{abs(pnl):,.0f} KRW {sign_pct}{abs(pnl_percent):.2f}%")
+        print(f"{market}: {sign_krw}{abs(pnl):,.0f} KRW {sign_pct}{abs(pnl_percent):.2f}% / {current_value:,} KRW")
+        pnl_ticker_list.append(market)
 
         # Count positive/negative PnL
         if pnl >= 0:
@@ -187,10 +245,24 @@ def print_pnl():
 
 if __name__ == "__main__":
 
-    print(f"Usage: python3 {os.path.basename(__file__)} {{pnl}}")
-    # input()
+    print(f"Usage: python3 {os.path.basename(__file__)} {{pnl}} {{ticker}}")
 
-    if "pnl" in sys.argv:
-        print_pnl()
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command")
+
+    # Define the 'pnl' command
+    pnl_parser = subparsers.add_parser("pnl")
+    pnl_parser.add_argument("ticker", nargs='?', default="all")
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Execute the appropriate command
+    if args.command == "pnl":
+        print_pnl(ticker=args.ticker)
+
     print_account_balance() # Holding alt list
     print_open_orders() # open orders
+
+    # c = list(set(holding_ticker_list) - set(pnl_ticker_list))
+    # print (c)
