@@ -15,6 +15,7 @@
     - 보유 알트 pnl 확인, 토탈 pnl 확인
     - 보유 알트 목록 확인
     - 매수/매도 대기 주문 확인 (open orders)
+- `python3 cancel_open_orders {bid|ask|all}`: 매수 혹은 매도 대기중인 주문 취소 (default: all)
 
 ## File descriptions
 - `get_data.py`: 데이터 확인용. 실행하면 n개의 티커, 24시간 거래대금, 현재가를 보여줌
@@ -27,11 +28,10 @@
     - 현재 open 매수/매도 주문들 확인
 - **[Deprecated]** `clear_all.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도
 - `clear_all_concurrent.py`: (매도) 대기 중인 모든 주문 취소 후 전부 매도 (n개 요청 동시에)
-- `alt_list.txt`: 매수한 알트 목록
+- **[Deprecated]** `alt_list.txt`: 매수한 알트 목록
 
 ## etc
 - `settings.json`의 `num_of_alts`가 10이라면, "거래 대금" 기준 상위 10개 알트만 매매한다.
 - 제외 알트 목록은 `settings.json`에 명시되어 있음.
     - ['KRW-BTC', 'KRW-ETH', 'KRW-SOL', 'KRW-USDT', 'KRW-USDC', 'KRW-CVC', 'KRW-XRP', 'KRW-MOVE', 'KRW-ME', 'KRW-BTG', 'KRW-ETC', 'KRW-BCH'] 등
     - 각자 입맛대로 조절
-- `buy_all.py` 실행 후 성공적으로 매수 주문 넣은 알트는 `alt_list.txt`에 기재되며 매도할 때도 이 파일을 참조하여 매도 실행
