@@ -3,8 +3,8 @@ from math import floor
 import os
 
 ### alt_list.txt ###
-with open('alt_list.txt', 'r') as f:
-    alt_list = [line for line in f.read().split("\n") if line]
+# with open('alt_list.txt', 'r') as f:
+    # alt_list = [line for line in f.read().split("\n") if line]
 
 ### settings.json ###
 with open('settings.json', 'r') as file:
