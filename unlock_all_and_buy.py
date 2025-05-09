@@ -71,7 +71,10 @@ def _cancel_order(order_uuid):
 
     # Send DELETE request to cancel the order
     res = requests.delete(f"{server_url}/v1/order", params=query, headers=headers)
+    if 400 <= res.status_code < 500:
+            assert False, f"{res.status_code} error occurred. | Response: {res.text}"
     res.raise_for_status()  # Raise an exception for HTTP errors
+    # return res.json()
     return res.status_code
 
 # Main logic to cancel open orders in specified markets
