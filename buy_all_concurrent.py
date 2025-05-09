@@ -95,9 +95,9 @@ if __name__ == '__main__':
             future_to_ticker = {
                 executor.submit(
                     process_order, 
-                    ticker, 
+                    ticker, # 'KRW-UXLINK'
                     trade_price, # current price
-                    krw_per_ticker
+                    krw_per_ticker # from settings.py
                 ): ticker
                 for ticker, trade_price in batch.items()
             }
@@ -125,7 +125,7 @@ if __name__ == '__main__':
         i += chunk_size
         if i < len(ticker_list):
             # Sleep for 1 second after every 8 completed tasks
-            time.sleep(1)
+            time.sleep(1.01)
             print()
 
     # Write successful tickers to file
