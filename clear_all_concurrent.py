@@ -10,6 +10,7 @@ from urllib.parse import urlencode, unquote
 from get_data import get_tickers
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from cancel_open_orders import cancel_orders_in_markets
+import sys
 
 from settings import *
 
@@ -133,5 +134,10 @@ def place_limit_sell_orders():
     print("Errors:", error_list)
 
 if __name__ == '__main__':
+    ans = input("\nSell all? (y/n)")
+
+    if ans != 'y':
+        print('bye')
+        sys.exit(0)
     cancel_orders_in_markets(_side="ask") # unlock all assets first
     place_limit_sell_orders()

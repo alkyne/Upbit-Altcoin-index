@@ -7,7 +7,7 @@ import json
 from pprint import pprint
 from urllib.parse import urlencode, unquote
 from get_data import get_tickers
-
+import sys
 from settings import *
 
 # Function to get all open orders
@@ -207,5 +207,11 @@ def place_limit_sell_orders():
 
 if __name__ == '__main__':
     # cancel_orders_in_markets() # unlock all assets first
+    ans = input("\ncontinue? (y/n)")
+
+    if ans != 'y':
+        print('bye')
+        sys.exit(0)
+        
     place_limit_sell_orders()
     get_account_balance(print_status=True)
