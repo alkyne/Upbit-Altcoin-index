@@ -207,7 +207,7 @@ def place_limit_sell_orders():
 
 if __name__ == '__main__':
     # cancel_orders_in_markets() # unlock all assets first
-    ans = input("\ncontinue? (y/n)")
+    ans = input("\nSell all? (y/n)")
 
     if ans != 'y':
         print('bye')
