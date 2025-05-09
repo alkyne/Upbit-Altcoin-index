@@ -1,6 +1,6 @@
 {
-    "num_of_alts": 70,
-    "minimum_volumne": 3000000,
-    "input_krw": 1860000,
-    "exclude_pairs": ["KRW-KRW", "KRW-BTC", "KRW-ETH", "KRW-SOL", "KRW-USDT", "KRW-USDC", "KRW-CVC", "KRW-XRP", "KRW-MOVE", "KRW-ME", "KRW-BTG", "KRW-ETC", "KRW-BCH", "KRW-RENDER", "KRW-BTT", "KRW-ETHW", "KRW-ETHF", "KRW-SEI", "KRW-STX", "KRW-EDG", "KRW-APENFT", "BTC-IOTX", "KRW-IOTX", "KRW-MOCA", "KRW-VANA", "KRW-BSV", "KRW-VTHO", "KRW-APT"]
+    "num_of_alts": 90,
+    // "minimum_volumne": 3000000,
+    "input_krw": 2000000,
+    "exclude_pairs": ["KRW-KRW", "KRW-BTC", "KRW-ETH", "KRW-SOL", "KRW-USDT", "KRW-USDC", "KRW-CVC", "KRW-XRP", "KRW-MOVE", "KRW-ME", "KRW-BTG", "KRW-ETC", "KRW-BCH", "KRW-RENDER", "KRW-BTT", "KRW-ETHW", "KRW-ETHF", "KRW-SEI", "KRW-STX", "KRW-APENFT", "BTC-IOTX", "KRW-MOCA", "KRW-BSV", "KRW-VTHO", "KRW-SIGN", "KRW-SIGN", "KRW-WCT", "KRW-WAL", "KRW-ORCA", "KRW-KAITO", "KRW-COW", "KRW-LAYER", "KRW-SCR", "KRW-JTO", "KRW-ANIME", "KRW-SONIC", "KRW-TRUMP", "KRW-HIFI", "KRW-QKC"]
 }
