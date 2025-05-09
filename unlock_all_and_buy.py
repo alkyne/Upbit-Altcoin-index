@@ -101,11 +101,12 @@ def cancel_orders_in_markets():
             volume = order['remaining_volume']
             price = order['price']
             cancel_status_code = _cancel_order(order_uuid)
-            if cancel_status_code == 200:
-                print(f"{market}: side={side}, volume={volume}, price={price}")
-                cancel_ticker_list += market
+            if cancel_status_code < 205:
+                # print(f"{market}: side={side}, volume={volume}, price={price}")
+                print(f"[Cancel Success] {market}: side={side}, volume={volume}, price={price}, uuid={order_uuid}")
+                cancel_ticker_list.append(market)
             else:
-                print(f"Order Cancel Error({cancel_status_code}): {market}\n")
+                print(f"[Cancel Error] {market}: code={cancel_status_code}, uuid={order_uuid}\n")
         print("All specified orders have been cancelled.")
     except requests.exceptions.HTTPError as err:
         error_msg = err.response.json()
@@ -168,12 +169,13 @@ def buy_crypto(cancel_ticker_list):
 
 if __name__ == '__main__':
     cancel_ticker_list = cancel_orders_in_markets() # unlock all assets first
-    print (f"cancel list: {cancel_ticker_list}")
-    print ("====== cancel end ======\n")
+    print (f"cancel_ticker_list: {cancel_ticker_list}")
 
     if len(cancel_ticker_list) == 0:
         print("nothing to cancel")
         sys.exit(0)
     
+    print ("====== cancel end ======\n")
+
     print("====== Re-order start ======\n")
     buy_crypto(cancel_ticker_list)

@@ -101,8 +101,13 @@ def cancel_orders_in_markets(_side="all"):
             market = order['market']
             volume = order['remaining_volume']
             price = order['price']
-            cancel_result = _cancel_order(order_uuid)
-            print(f"Cancelled order {order_uuid} in market {market}: side={side}, volume={volume}, price={price}")
+            cancel_status_code = _cancel_order(order_uuid)
+            if cancel_status_code < 205:
+                # print(f"{market}: side={side}, volume={volume}, price={price}")
+                print(f"[Cancel Success] {market}: side={side}, volume={volume}, price={price}, uuid={order_uuid}")
+            else:
+                print(f"[Cancel Error] {market}: code={cancel_status_code}, uuid={order_uuid}\n")
+
         print("All specified orders have been cancelled.")
     except requests.exceptions.HTTPError as err:
         error_msg = err.response.json()
